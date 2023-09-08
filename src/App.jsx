@@ -1,9 +1,26 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "./styles.css"
 import { NewTodoForm } from "./NewTodoForm";
+import { TodoList } from "./TodoList";
 
 export default function App() {
-  const [todos, setTodos] = useState([]);
+  // get item from local storage by calling useState & passing it a function
+  const [todos, setTodos] = useState(() => {
+    // useState checks localStorage & gets value if it exists
+    const localValue = localStorage.getItem("ITEMS")
+    // if it doesn't exist, default to empty array 
+    if (localValue == null) return []
+
+    // parse whats in localStorage & return that as default value
+    return JSON.parse(localValue) 
+  });
+
+  // any time `todos` is modified, useEffect calls this function
+  // which goes to `localStorage` & sets `ITEMS` property to be JSON stringified version of `todos`
+  useEffect(() => {
+    localStorage.setItem("ITEMS", JSON.stringify(todos))   // takes our todo and stores it in localStorage
+  }, [todos])
+
 
   // function gets passed down to `NewTodoForm` as prop
   function addTodo(title) {    // pass in title we want to add for new todo
@@ -46,39 +63,12 @@ export default function App() {
     <>
       <NewTodoForm addTodo={addTodo} />
       <h1 className="header">Todo List</h1>
-      <ul className="list">
-        {/* if no todos, render message */}
-        {todos.length === 0 && "No Todos"}
-
-        {/* for each todo, we want to return one <li> element */}
-        {todos.map(todo => { // map returns an array 
-          // need to add key prop when returning an array of elements
-          // add this to the very top level <li>
-          return (
-            // unique identifier for each todo element 
-            <li key={todo.id}> 
-              <label>
-                {/* toggle checkbox when clicked*/}
-                <input 
-                  type="checkbox" 
-                  checked={todo.completed} 
-                  // when checkbox is changed, calls `toggleTodo` for a particular id
-                  // and passes along whether or not that `todo` is checked
-                  onChange={e => toggleTodo(todo.id, e.target.checked)}
-                  />
-                {todo.title}
-              </label>
-              <button 
-                // when Delete button is clicked, calls deleteTodo w/ the todo id
-                onClick={() => deleteTodo(todo.id)}
-                className="btn btn-danger"
-              >
-                Delete
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+      {/* pass todos & functions as props to `TodoList` */}
+      <TodoList 
+        todos={todos}
+        toggleTodo={toggleTodo}
+        deleteTodo={deleteTodo}
+        /> 
     </>
   )
 }
