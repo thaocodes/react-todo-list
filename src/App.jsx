@@ -1,27 +1,23 @@
 import { useState } from "react"
 import "./styles.css"
+import { NewTodoForm } from "./NewTodoForm";
 
 export default function App() {
-  const [newItem, setNewItem] = useState("");
   const [todos, setTodos] = useState([]);
 
-  // handles adding new item
-  function handleSubmit(e) {
-    e.preventDefault()
-  
+  // function gets passed down to `NewTodoForm` as prop
+  function addTodo(title) {    // pass in title we want to add for new todo
     // pass function to `setTodos` to add new items to `todos` array
     setTodos((currentTodos) => {
       // function returns whatever value we want state to be
       // takes one arg `currentTodos` which is current value of our state 
       return [
         ...currentTodos, // spread operator copies `currentTodos` array & adds new item: 
-        { id: crypto.randomUUID(), title: newItem, completed: false }, // new item
+        { id: crypto.randomUUID(), title, completed: false }, // new item
       ]
     })
-    // clear out input box after each `todo` item gets added
-    setNewItem("") 
   }
-  
+
   // handles toggling checkbox, function takes in `id` & `completed`
   function toggleTodo(id, completed) {
     setTodos((currentTodos) => {
@@ -47,56 +43,42 @@ export default function App() {
   }
 
   return (
-  // wrap in fragment, returns more than 1 element
-  <> 
-    <form onSubmit={handleSubmit} className="new-item-form">
-      <div className="form-row">
-        {/* need to link up label to input, use `htmlFor` (instead of `for`) for JSX */}
-        <label htmlFor="Item">New Item</label>
+    <>
+      <NewTodoForm addTodo={addTodo} />
+      <h1 className="header">Todo List</h1>
+      <ul className="list">
+        {/* if no todos, render message */}
+        {todos.length === 0 && "No Todos"}
 
-        {/* update input when it changes */}
-        <input 
-          value={newItem} // set the value of input to whatever our newItem variable is 
-          onChange={e => setNewItem(e.target.value)}
-          type="text" 
-          id="item" />
-      </div>
-      <button className="btn">Add</button>
-    </form>
-    <h1 className="header">Todo List</h1>
-    <ul className="list">
-      {/* if no todos, render message */}
-      {todos.length === 0 && "No Todos"}
-
-      {/* for each todo, we want to return one <li> element */}
-      {todos.map(todo => { // map returns an array 
-      // need to add key prop when returning an array of elements
-      // add this to the very top level <li>
-        return (
-          // unique identifier for each todo element 
-          <li key={todo.id}> 
-            <label>
-              {/* toggle checkbox when clicked*/}
-              <input 
-                type="checkbox" 
-                checked={todo.completed} 
-                // when checkbox is changed, calls `toggleTodo` for a particular id
-                // and passes along whether or not that `todo` is checked
-                onChange={e => toggleTodo(todo.id, e.target.checked)}
-                />
-              {todo.title}
-            </label>
-            <button 
-              // when Delete button is clicked, calls deleteTodo w/ the todo id
-              onClick={() => deleteTodo(todo.id)}
-              className="btn btn-danger"
-            >
-              Delete
-            </button>
-          </li>
-        )
-      })}
-    </ul>
-  </>
+        {/* for each todo, we want to return one <li> element */}
+        {todos.map(todo => { // map returns an array 
+          // need to add key prop when returning an array of elements
+          // add this to the very top level <li>
+          return (
+            // unique identifier for each todo element 
+            <li key={todo.id}> 
+              <label>
+                {/* toggle checkbox when clicked*/}
+                <input 
+                  type="checkbox" 
+                  checked={todo.completed} 
+                  // when checkbox is changed, calls `toggleTodo` for a particular id
+                  // and passes along whether or not that `todo` is checked
+                  onChange={e => toggleTodo(todo.id, e.target.checked)}
+                  />
+                {todo.title}
+              </label>
+              <button 
+                // when Delete button is clicked, calls deleteTodo w/ the todo id
+                onClick={() => deleteTodo(todo.id)}
+                className="btn btn-danger"
+              >
+                Delete
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </>
   )
 }
