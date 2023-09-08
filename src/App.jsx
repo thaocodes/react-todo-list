@@ -39,6 +39,12 @@ export default function App() {
   } 
 
   // handles deleting a `todo`
+  function deleteTodo(id) {
+    setTodos(currentTodos => {
+      // filters through `currentTodos`, returns `currentTodos` with deleted todo removed
+      return currentTodos.filter(todo => todo.id !== id)
+    })
+  }
 
   return (
   // wrap in fragment, returns more than 1 element
@@ -59,6 +65,9 @@ export default function App() {
     </form>
     <h1 className="header">Todo List</h1>
     <ul className="list">
+      {/* if no todos, render message */}
+      {todos.length === 0 && "No Todos"}
+
       {/* for each todo, we want to return one <li> element */}
       {todos.map(todo => { // map returns an array 
       // need to add key prop when returning an array of elements
@@ -77,7 +86,13 @@ export default function App() {
                 />
               {todo.title}
             </label>
-            <button className="btn btn-danger">Delete</button>
+            <button 
+              // when Delete button is clicked, calls deleteTodo w/ the todo id
+              onClick={() => deleteTodo(todo.id)}
+              className="btn btn-danger"
+            >
+              Delete
+            </button>
           </li>
         )
       })}
